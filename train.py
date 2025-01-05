@@ -4,8 +4,8 @@ import kerastuner as kt
 
 from sklearn import metrics, model_selection
 
-from auto_models import AutoModel
-from tuner import SklearnCVTuner
+# from auto_models import AutoModel
+# from tuner import SklearnCVTuner
 
 from sklearn.preprocessing import StandardScaler
 
@@ -13,28 +13,13 @@ from xgboost import XGBClassifier
 
 from imblearn import combine, over_sampling, under_sampling, pipeline
 
-import pickle
+# import pickle
 
 def micro_f1(y_true, y_pred):
     return metrics.f1_score(y_true, y_pred, average="micro")
 
 def macro_f1(y_true, y_pred):
     return metrics.f1_score(y_true, y_pred, average="macro")
-
-def get_tuner(model, trials, folds=5, metric=micro_f1):
-    return SklearnCVTuner(
-        oracle=kt.oracles.BayesianOptimizationOracle(
-            objective=kt.Objective("score", "max"),
-            max_trials=trials,
-            seed=42
-        ),
-        hypermodel=model,
-        scoring=metrics.make_scorer(metric),
-        cv=model_selection.StratifiedKFold(folds),
-        directory="training",
-        project_name="classification_tuning",
-        overwrite=True
-    )
 
 
 if __name__ == "__main__":
@@ -55,9 +40,10 @@ if __name__ == "__main__":
         y_train_ids = pd.read_csv(code_smell + "/data/data_splits/y_train_" + str(rand_seed) + ".csv")
 
         data_paths = [
-            "whole_merged.pkl",
-            "sum_merged.pkl",
-            "avg_merged.pkl",
+            "metrics_pmd_merged.pkl",
+            # "whole_pmd_merged.pkl",
+            # "sum_pmd_merged.pkl",
+            # "avg_pmd_merged.pkl",
             ]
 
         for data_path in (data_paths):
@@ -105,13 +91,13 @@ if __name__ == "__main__":
                     eval_metric="logloss",
                     learning_rate=0.1,
                     max_depth=6,
-                    subsample=0.8,
+                    subsample=0.6,
                     # gamma=0,
-                    min_child_weight=1,
-                    colsample_bytree=0.8,
-                    colsample_bylevel=0.8,
+                    min_child_weight=3,
+                    # colsample_bytree=0.8,
+                    # colsample_bylevel=0.8,
                     # colsample_bynode=0.6,
-                    reg_lambda=5,
+                    reg_lambda=1,
                     # reg_alpha=hp.Float("reg_alpha", 0, 10, sampling="linear"),
                     seed=42,
                     # n_jobs=-1
@@ -123,7 +109,7 @@ if __name__ == "__main__":
             y_pred_train = best_model.predict(X_train)
             y_pred = best_model.predict(X_test)
 
-            print('----------------------------------    RESULTS: ' + data_path + '---------------------------------------')
+            print(f'----------------------------------    RESULTS: {rand_seed}/{len(rand_seeds)} ' + data_path + '---------------------------------------')
 
             f1_micro =  micro_f1(y_train, y_pred_train)
             f1_macro = macro_f1(y_train, y_pred_train)
@@ -135,6 +121,7 @@ if __name__ == "__main__":
             print("Train accuracy: ", accuracy)
             print("\nTest metrics")
             print("Test report: \n", report)
+            print(f"Seed: {rand_seed}/{len(rand_seeds)}")
 
             new_row = {'dataset': data_path, 'random_seed': rand_seed, 'f1_micro': f1_micro, 'f1_macro':f1_macro, 'accuracy':accuracy, 'classification_report':report}
             results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
