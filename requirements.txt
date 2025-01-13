@@ -122,3 +122,6 @@ xgboost
 xlrd
 XlsxWriter
 zipp
+
+peft
+datasets

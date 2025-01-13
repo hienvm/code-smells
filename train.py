@@ -1,9 +1,7 @@
 import pandas as pd
-
-import kerastuner as kt
-
 from sklearn import metrics, model_selection
 
+# import kerastuner as kt
 # from auto_models import AutoModel
 # from tuner import SklearnCVTuner
 
@@ -28,8 +26,8 @@ if __name__ == "__main__":
     column_names = ["dataset", "random_seed", "f1_micro", "f1_macro", "accuracy", 'classification_report']
     results_df = pd.DataFrame(columns = column_names)
 
-    # code_smell = 'feature_envy'
-    code_smell = 'data_class'
+    code_smell = 'feature_envy'
+    # code_smell = 'data_class'
 
     data_path_base = code_smell + '/data/embedded_datasets/'
 
@@ -41,9 +39,6 @@ if __name__ == "__main__":
 
         data_paths = [
             "metrics_pmd_merged.pkl",
-            # "whole_pmd_merged.pkl",
-            # "sum_pmd_merged.pkl",
-            # "avg_pmd_merged.pkl",
             ]
 
         for data_path in (data_paths):
@@ -90,8 +85,8 @@ if __name__ == "__main__":
                     # use_label_encoder=False,
                     eval_metric="logloss",
                     learning_rate=0.1,
-                    max_depth=6,
-                    subsample=0.6,
+                    max_depth=4,
+                    subsample=0.8,
                     # gamma=0,
                     min_child_weight=3,
                     # colsample_bytree=0.8,
